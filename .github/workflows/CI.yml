@@ -29,7 +29,7 @@ jobs:
       run: npm install jest eslint
       working-directory: /__w/distroless-lamanu/distroless-lamanu/source-app/
 
-    - name: test du index.js 
+    - name: tests running 
       run: npm run test
       working-directory: /__w/distroless-lamanu/distroless-lamanu/source-app/
 
@@ -49,22 +49,27 @@ jobs:
     steps:
 
       - name: echo env
-        run: env && pwd && ls -altr
+        run: env && pwd && ls -altr && echo id:$(id)
+ 
       - name: run pipe
         run: |
           echo "checkout repo"
-           
+          echo ${PWD} 
       - name: checkout repo
         uses: actions/checkout@v3
-        with:
-          path: "__w/distroless-lamanu/distroless-lamanu/source-app/"
-      
-      - name: npm start 
-        #working-directory: /__w/distroless-lamanu/distroless-lamanu/source-app/
-        working-directory: /__w/distroless-lamanu/distroless-lamanu/__w/distroless-lamanu/distroless-lamanu/source-app
+        #with:
+        #  path: "__w/distroless-lamanu/distroless-lamanu/source-app/"
 
+      - name: npm install
+        working-directory: /__w/distroless-lamanu/distroless-lamanu/source-app/
+        run: npm instal
+
+      - name: npm start 
+        working-directory: /__w/distroless-lamanu/distroless-lamanu/source-app/
         run: |
-          npm start 
+          env && pwd && ls -altr
+          
+          npm start &
       - name: curl 
         run: |
           curl http://localhost:3000/ 
