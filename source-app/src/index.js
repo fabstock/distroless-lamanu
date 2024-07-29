@@ -22,6 +22,20 @@ app.post('/sum', (req, res) => {
   }
 });
 
+
+// Route pour additionner deux nombres
+app.get('/sum', (req, res) => {
+  const { a, b } = req.body;
+  if (typeof a === 'number' && typeof b === 'number') {
+    const result = sum(a, b);
+    res.json({ result });
+  } else {
+    res.status(400).json({ error: 'Invalid input' });
+  }
+});
+
+
+
 // Fonction pour additionner deux nombres
 const sum = (a, b) => a + b;
 
