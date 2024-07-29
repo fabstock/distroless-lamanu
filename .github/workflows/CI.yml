@@ -6,7 +6,57 @@ on:
 
 jobs:
 
+  build-image:
+    runs-on: ubuntu-latest
+    environment: "CICD"
+    steps:
+
+    - name: Sparse checkout
+      uses: actions/checkout@v4
+      with:
+        sparse-checkout: |
+          Dockerfile
+          .dockerignore
+    - name: ls 
+      run: |
+          env && pwd && ls -altr
+    #- name: login dockerhub action 
+    #  uses: docker/login-action@f4ef78c080cd8ba55a85445d5b36e214a81df20a
+    #  #username: ${{ secrets.DOCKERHUB_USERNAME }}
+    #  #password: ${{ secrets.DOCKERHUB_PASSWORD }}
+    #  with:
+    #    username: ${{ secrets.DOCKERHUB_USERNAME }}
+    #    password: ${{ secrets.DOCKERHUB_PASSWORD }}
+
+    #- name: Login Registry Dockerhub
+    #  env:
+    #    DOCKER_USERNAME: ${{ secrets.DOCKER_USER }}
+    #    DOCKER_PASSWORD: ${{ secrets.DOCKER_PASS }}
+    #  run: echo ${{ secrets.DOCKERHUB_PASSWORD }} | docker login -u ${{ secrets.DOCKERHUB_USERNAME }} --password-stdin
+    #  run:  echo "$DOCKER_PASSWORD" | docker login --username=$DOCKER_USERNAME --password-stdin
+    #  #run: docker login -u $DOCKER_USER -p $DOCKER_PASS
+
+    #- name: Build  Image
+    #  run: docker build  -t fabstock2/nodeapp:0.0.1-manu .
+
+    #- name: Tag Image
+    #  run: docker tag fabstock2/nodeapp:0.0.1-manu fabstock2/nodeapp:latest
+
+
+    #- name: Push Hub Docker
+    #  run: docker push fabstock2/nodeapp:0.0.1-manu:latest
+    - name: login docker hub registry
+      uses: docker/login-action@f4ef78c080cd8ba55a85445d5b36e214a81df20a
+      with:
+        username: ${{ secrets.DOCKER_USERNAME }}
+        password: ${{ secrets.DOCKER_PASSWORD }}
+
+
+    
+
+
   build-test:
+    needs: build-image
     runs-on: ubuntu-latest
     container:
       image: fabstock2/source-app:0.0.1-lamanu
@@ -19,15 +69,37 @@ jobs:
     
     - name : checkout repo
       uses: actions/checkout@v3
+
+    - name: affiche variables 
+      run: |
+        echo GITHUB_WORKSPACE: $GITHUB_WORKSPACE GIT_DIR: $GIT_DIR  GIT_WORK_TREE: $GIT_WORK_TREE
+
+
     
     - name: Install dependencies
       run: npm install
       working-directory: /__w/distroless-lamanu/distroless-lamanu/source-app/
  
-
     - name: install jest & eslint 
       run: npm install jest eslint
       working-directory: /__w/distroless-lamanu/distroless-lamanu/source-app/
+
+    - name: Get npm cache directory
+      id: npm-cache-dir
+      shell: sh
+      run: echo "dir=$(npm config get cache)" >> ${GITHUB_OUTPUT}
+    
+    - name: cache node_module
+      id: npm-cache
+      uses: actions/cache@v4
+      with:
+        #path: '/__w/distroless-lamanu/distroless-lamanu/source-app/node_modules'
+        #key: ${{ runner.os }}-${{ hashFiles('**/package-lock.json') }}
+        path: ${{ steps.npm-cache-dir.outputs.dir }}
+        key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+        restore-keys: |
+          ${{ runner.os }}-node-
+
 
     - name: tests running 
       run: npm run test
@@ -73,12 +145,3 @@ jobs:
       - name: curl 
         run: |
           curl http://localhost:3000/ 
-
-
-   
-     
-   
-    
-
-   
-     
