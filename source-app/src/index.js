@@ -22,13 +22,12 @@ app.post('/sum', (req, res) => {
   }
 });
 
-
-
-
 // Fonction pour additionner deux nombres
 const sum = (a, b) => a + b;
 
 let server;
+console.log(process.env.NODE_ENV);
+
 if (process.env.NODE_ENV !== 'test') {
   server = app.listen(port, () => {
     console.log(`App listening at http://localhost:${port}`);
