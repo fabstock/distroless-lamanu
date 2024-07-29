@@ -7,8 +7,9 @@ WORKDIR /source-app/
 
 RUN mkdir -p /source-app
 
-ADD ./source-app  ./
+#ADD ./source-app  ./
 
+#COPY ./source-app/package.js .
 
 
 
@@ -16,7 +17,7 @@ ADD ./source-app  ./
 EXPOSE 3000
 
 
-RUN ls -altr && pwd && npm install 
+#RUN ls -altr && pwd && npm install 
 #--production
 #RUN npm install --production --omit=dev
-CMD ["node","/source-app/src/index.js"]
+#CMD ["node","/source-app/src/index.js"]
