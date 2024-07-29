@@ -6,30 +6,74 @@ on:
 
 jobs:
 
-  build:
+  build-test:
     runs-on: ubuntu-latest
     container:
       image: fabstock2/source-app:0.0.1-lamanu
       env:
-        NODE_ENV: development
+        NODE_ENV: test
       ports:
         - 3000
     
     steps:
-
-    - uses: actions/checkout@v3
+    
+    - name : checkout repo
+      uses: actions/checkout@v3
     
     - name: Install dependencies
-      run: npm ci
-      working-directory: /source-app/
+      run: npm install
+      working-directory: /__w/distroless-lamanu/distroless-lamanu/source-app/
+ 
 
     - name: install jest & eslint 
       run: npm install jest eslint
+      working-directory: /__w/distroless-lamanu/distroless-lamanu/source-app/
 
     - name: test du index.js 
       run: npm run test
-      working-directory: /source-app/
+      working-directory: /__w/distroless-lamanu/distroless-lamanu/source-app/
 
     - name: run lint 
       run: npm run lint
-      working-directory: /source-app/
+      working-directory: /__w/distroless-lamanu/distroless-lamanu/source-app/
+  
+  deploy:
+    needs: build-test
+    runs-on: ubuntu-latest
+    container:
+      image: fabstock2/source-app:0.0.1-lamanu
+      env:
+        NODE_ENV: production
+      ports:
+        - 3000
+    steps:
+
+      - name: echo env
+        run: env && pwd && ls -altr
+      - name: run pipe
+        run: |
+          echo "checkout repo"
+           
+      - name: checkout repo
+        uses: actions/checkout@v3
+        with:
+          path: "__w/distroless-lamanu/distroless-lamanu/source-app/"
+      
+      - name: npm start 
+        #working-directory: /__w/distroless-lamanu/distroless-lamanu/source-app/
+        working-directory: /__w/distroless-lamanu/distroless-lamanu/__w/distroless-lamanu/distroless-lamanu/source-app
+
+        run: |
+          npm start 
+      - name: curl 
+        run: |
+          curl http://localhost:3000/ 
+
+
+   
+     
+   
+    
+
+   
+     

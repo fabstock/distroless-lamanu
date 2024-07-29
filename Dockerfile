@@ -4,6 +4,7 @@ FROM node:20.16-alpine AS base
 ENV NODE_ENV production
 WORKDIR /source-app/
 
+RUN apk update && apk add curl
 
 RUN mkdir -p /source-app
 
