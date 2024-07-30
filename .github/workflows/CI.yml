@@ -9,6 +9,7 @@ jobs:
   build-image:
     runs-on: ubuntu-latest
     environment: "CICD"
+
     steps:
 
     - name: Sparse checkout
@@ -65,6 +66,7 @@ jobs:
       ports:
         - 3000
     
+    environment: "CICD"
     steps:
     
     - name : checkout repo
@@ -72,23 +74,30 @@ jobs:
 
     - name: affiche variables 
       run: |
-        echo GITHUB_WORKSPACE: $GITHUB_WORKSPACE GIT_DIR: $GIT_DIR  GIT_WORK_TREE: $GIT_WORK_TREE
+        echo GITHUB_WORKSPACE: $GITHUB_WORKSPACE GITHUB_ACTION_REPOSITORY: $GITHUB_ACTION_REPOSITORY GIT_DIR: $GIT_DIR  GIT_WORK_TREE: $GIT_WORK_TREE \
+             GITHUB_PATH: $GITHUB_PATH
 
 
     
     - name: Install dependencies
       run: npm install
-      working-directory: /__w/distroless-lamanu/distroless-lamanu/source-app/
+      #working-directory: /__w/distroless-lamanu/distroless-lamanu/source-app/
+      working-directory: source-app/
  
     - name: install jest & eslint 
       run: npm install jest eslint
-      working-directory: /__w/distroless-lamanu/distroless-lamanu/source-app/
+      #working-directory: /__w/distroless-lamanu/distroless-lamanu/source-app/
+      working-directory: source-app/
 
     - name: Get npm cache directory
       id: npm-cache-dir
       shell: sh
       run: echo "dir=$(npm config get cache)" >> ${GITHUB_OUTPUT}
-    
+   
+
+
+
+ 
     - name: cache node_module
       id: npm-cache
       uses: actions/cache@v4
@@ -101,14 +110,39 @@ jobs:
           ${{ runner.os }}-node-
 
 
+
+    - name: affiche variable
+      run: env 
+
+
+
     - name: tests running 
       run: npm run test
-      working-directory: /__w/distroless-lamanu/distroless-lamanu/source-app/
+      #working-directory: /__w/distroless-lamanu/distroless-lamanu/source-app/
+      working-directory: source-app/
 
     - name: run lint 
       run: npm run lint
-      working-directory: /__w/distroless-lamanu/distroless-lamanu/source-app/
-  
+      #working-directory: /__w/distroless-lamanu/distroless-lamanu/source-app/
+      working-directory: source-app/
+
+ 
+    - name: Discord Notification on Success
+      if: ${{ success() }}
+      env:
+        DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
+      uses: Ilshidur/action-discord@master
+      with:
+        args: 'Tests and lint  for  project {{ EVENT_PAYLOAD.repository.full_name }} (lint, tests) passed the lint and tests.'
+
+    - name: Discord Notification on Failure
+      if: ${{ failure() }}
+      env:
+        DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
+      uses: Ilshidur/action-discord@master
+      with:
+        args: 'Tests and lint for  project {{ EVENT_PAYLOAD.repository.full_name }} has failed.'
+ 
   deploy:
     needs: build-test
     runs-on: ubuntu-latest
@@ -133,11 +167,13 @@ jobs:
         #  path: "__w/distroless-lamanu/distroless-lamanu/source-app/"
 
       - name: npm install
-        working-directory: /__w/distroless-lamanu/distroless-lamanu/source-app/
+        working-directory: /source-app/
+        #working-directory: /__w/distroless-lamanu/distroless-lamanu/source-app/
         run: npm instal
 
       - name: npm start 
-        working-directory: /__w/distroless-lamanu/distroless-lamanu/source-app/
+        working-directory: /source-app/
+        #working-directory: /__w/distroless-lamanu/distroless-lamanu/source-app/
         run: |
           env && pwd && ls -altr
           
